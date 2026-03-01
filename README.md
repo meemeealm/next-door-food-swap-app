@@ -9,17 +9,20 @@ A localized, community-driven web application designed to reduce food waste and 
 --- 
 
 ### ✨ Features
-Real-time Postings: Users can easily list items with categories (Vegetables, Fruit, Meals, etc.) via a sidebar form.
 
-Smart Search & Filtering: Find exactly what you need by keyword or category.
+Localized Community Board: A neighborhood-first platform tailored for South East Asian staples—sharing everything from Adobo and Kangkong to Ube and Calamansi.
 
-WhatsApp Integration: A custom-styled green button that opens a pre-filled chat with the item owner for instant coordination.
+Persistent SQLite Backend: Robust data management using SQL, moving beyond temporary files to ensure community postings are safely stored and easily retrievable.
 
-Temporary Claiming: Uses Streamlit Session State to allow users to "reserve" items during their browsing session without permanently deleting data.
+Intelligent Search & Categorization: High-performance filtering that allows neighbors to instantly sort through local produce and cooked meals by keyword or regional category.
 
-Persistent Storage: All community data is backed up in a lightweight CSV "database" for easy management.
+Seamless WhatsApp Coordination: Direct-to-chat integration via custom-styled API links, featuring pre-filled messages to eliminate friction between neighbors.
 
-Modern UI: Custom CSS-styled buttons (Blue for actions, Green for WhatsApp, Grey for Undo) for a professional user experience.
+Real-time Reservation Logic: A synchronized "Claim" system that updates the database instantly, marking items as "Reserved" across all user sessions to prevent double-claiming.
+
+Professional Responsive UI: A modern, mobile-friendly interface powered by custom CSS, featuring a distinct color-coded action system:  
+Action Blue: For claiming and contributing.  
+WhatsApp Green: For instant regional communication.
 
 ---
 
