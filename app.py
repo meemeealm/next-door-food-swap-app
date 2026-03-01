@@ -3,21 +3,17 @@ import pandas as pd
 from datetime import datetime
 import os
 
-# 1. Setup the "Database"
-DB_FILE = "food_swap_db.csv"
-
-def load_data():
-    if not os.path.exists(DB_FILE):
-        return pd.DataFrame(columns=["User", "Phone", "Item", "Category", "Quantity", "Posted"])
-    df = pd.read_csv(DB_FILE)
-    return df.reset_index(drop=True) 
-
-def save_data(df):
-    df.to_csv(DB_FILE, index=False)
+from database import init_db, add_item, get_all_items, toggle_claim
 
 # 2. Page Configuration
 st.set_page_config(page_title="Neighborhood Food Swap", page_icon="🍎")
 st.title("🍎 NextDoor")
+
+init_db()
+
+# Fetch data from DB
+data = get_all_items()
+
 
 # --- CUSTOM CSS ---
 st.markdown("""
@@ -86,18 +82,13 @@ with st.sidebar.form("post_form", clear_on_submit=True):
     submit = st.form_submit_button("Post to Board")
 
     if submit and name and item:
-        df = load_data()
-        new_entry = {
-            "User": name, "Phone": phone, "Item": item, "Category": category, 
-            "Quantity": qty, "Posted": datetime.now().strftime("%Y-%m-%d %H:%M")
-        }
-        df = pd.concat([df, pd.DataFrame([new_entry])], ignore_index=True)
-        save_data(df)
+        add_item(name, phone, item, category, qty) 
         st.success("Post added!")
         st.rerun()
 
 # 4. Search & Filter Section
-df = load_data()
+
+df = get_all_items() # Pulls from SQLite as a DataFrame
 st.divider()
 search_col, cat_col = st.columns([2, 1])
 
@@ -109,11 +100,15 @@ with cat_col:
     selected_cat = st.selectbox("Filter by Category", categories)
 
 # Apply Filters
+# Apply Filters
 if search_term:
-    df = df[df['Item'].str.contains(search_term, case=False) | 
-            df['User'].str.contains(search_term, case=False)]
+    # Change 'Item' to 'item' and 'User' to 'user'
+    df = df[df['item'].str.contains(search_term, case=False) | 
+            df['user'].str.contains(search_term, case=False)]
+
 if selected_cat != "All":
-    df = df[df['Category'] == selected_cat]
+    # Change 'Category' to 'category'
+    df = df[df['category'] == selected_cat]
 
 # 5. Initialize Temporary Memory (Session State)
 # This list resets to empty every time the app server restarts
@@ -123,37 +118,31 @@ if 'claimed_indices' not in st.session_state:
 
 # 5. The Main Display Loop
 if not df.empty:
-    # Use a container to keep things tidy
-    for index, row in df.iloc[::-1].iterrows():
-        is_claimed = index in st.session_state.claimed_indices
+    for index, row in df.iterrows():
+        # Check status from the DATABASE column, not session_state
+        is_claimed = (row['status'] == 'Reserved')
         
-        # Adjusting ratios: 3 parts for text, 1 for WA, 1 for Action
         cols = st.columns([3, 1, 1], vertical_alignment="center")
         
         with cols[0]:
             if is_claimed:
-                st.markdown(f"### ~~{row['Item']}~~")
-                st.caption("🚩 Temporarily Reserved")
+                st.markdown(f"### ~~{row['item']}~~")
+                st.caption(f"🚩 Reserved by a neighbor (Owner: {row['user']})")
             else:
-                st.markdown(f"### {row['Item']}")
-                st.write(f"**Owner:** {row['User']} | **Qty:** {row['Quantity']}")
+                st.markdown(f"### {row['item']}")
+                st.write(f"**Owner:** {row['user']} | **Qty:** {row['quantity']}")
 
         with cols[1]:
-            # Use a div to help with alignment consistency
-            wa_link = f"https://wa.me/{row['Phone']}?text=Hi%20{row['User']},%20is%20the%20{row['Item']}%20still%20available?"
+            wa_link = f"https://wa.me/{row['phone']}?text=Hi%20{row['user']},%20is%20the%20{row['item']}%20still%20available?"
             st.markdown(f'<a href="{wa_link}" target="_blank" class="wa-btn">💬 WhatsApp</a>', unsafe_allow_html=True)
 
         with cols[2]:
-            if is_claimed:
-                st.markdown('<div class="undo-btn">', unsafe_allow_html=True)
-                if st.button("Undo ↩️", key=f"undo_{index}"):
-                    st.session_state.claimed_indices.remove(index)
-                    st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
-            else:
-                st.markdown('<div class="claim-btn">', unsafe_allow_html=True)
-                if st.button("Claim", key=f"claim_{index}_{row.get('Item', index)}"):
-                    st.session_state.claimed_indices.append(index)
-                    st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
+            # The Button now talks to the DB
+            button_label = "Undo ↩️" if is_claimed else "Claim"
+            button_key = f"btn_{row['id']}" # Use the SQL ID as the key
+            
+            if st.button(button_label, key=button_key):
+                from database import toggle_claim
+                toggle_claim(row['id'], row['status'])
+                st.rerun() # Refresh to show the new status to everyone
         st.divider()
