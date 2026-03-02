@@ -4,7 +4,7 @@ A localized, community-driven web application designed to reduce food waste and 
 
 ### 📸 App Preview
 
-| <img src="https://github.com/meemeealm/next-door-food-swap-app/blob/main/imgs/NextDoor1.png" width="45%"/> | <img src="https://github.com/meemeealm/next-door-food-swap-app/blob/main/imgs/NextDoor2.png" width="45%"/> |
+| <img src="https://github.com/meemeealm/next-door-food-swap-app/blob/main/imgs/nextdoor_home.png" width="45%"/> | <img src="https://github.com/meemeealm/next-door-food-swap-app/blob/main/imgs/nextdoor_map.png" width="45%"/> |
 
 --- 
 
@@ -20,7 +20,9 @@ Seamless WhatsApp Coordination: Direct-to-chat integration via custom-styled API
 
 Real-time Reservation Logic: A synchronized "Claim" system that updates the database instantly, marking items as "Reserved" across all user sessions to prevent double-claiming.
 
-Professional Responsive UI: A modern, mobile-friendly interface powered by custom CSS, featuring a distinct color-coded action system:  
+Geospatial Data Visualization: A high-performance Pydeck integration that renders color-coded categories across a dynamic map layer, featuring custom HTML tooltips and automated coordinate-clustering for localized neighborhood discovery.
+
+Responsive UI: A modern, mobile-friendly interface powered by custom CSS, featuring a distinct color-coded action system:  
 Action Blue: For claiming and contributing.  
 WhatsApp Green: For instant regional communication.
 
@@ -34,6 +36,10 @@ Streamlit (Frontend & State Management)
 Pandas (Data Handling)
 
 HTML/CSS (Custom UI Injection)
+
+pydeck (map)
+
+faker (Generate fake data)
 
 ---
 
